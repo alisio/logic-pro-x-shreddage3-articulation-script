@@ -66,23 +66,83 @@ var PluginParameters = [
 {name:"Tapping",        type:"menu", valueStrings:KEYSWITCH_NOTES, defaultValue: 9, numberOfSteps: KEYSWITCH_NOTES.length-1}
 ];
 
+var articulation;
+var prev_art;
+var keyswitch_active = false;
                         
 function HandleMIDI(event) 
 {
 	if (event instanceof NoteOn) 
 	{
-		var articulation = GetParameter("Articulation");
-		var art_ks_type = GetParameter(ARTICULATION_TYPES[articulation]);
-		var keyswitch = KEYSWITCH_NOTES[art_ks_type];
-		//Trace(MIDI.noteName(event.pitch) + " " + ARTICULATION_TYPES[articulation] + " ks " + keyswitch);
-		// create keyswitch event before actual note event
-		var ks = new NoteOn;
-		ks.pitch = KEYSWITCH_NOTES.indexOf(keyswitch);
-		//Trace(MIDI.noteName(ks.pitch));
-
-		var ks_off = new NoteOff(ks);
-		ks.send();				
-		ks_off.sendAfterMilliseconds(15);
+		CheckArticulation();
 	}
+	else if(event instanceof NoteOff)
+	{
+	}
+	else Trace(event);
 	event.send();
+}
+
+function ProcessMIDI() // called once per process block
+{
+	var info = GetTimingInfo();
+	if(!info.playing && keyswitch_active)
+	{
+		DeactivateKeySwitch(prev_art);
+	}
+}
+
+function CheckArticulation()
+{
+	articulation = GetParameter("Articulation");
+	if(articulation != prev_art)
+	{
+		if(keyswitch_active)
+		{
+			DeactivateKeySwitch(prev_art);
+		}
+		ActivateKeySwitch(articulation);
+	}
+}
+
+function ActivateKeySwitch(art)
+{
+	if(art < 0)
+	{
+		Trace("ActivateKeySwitch invalid parameter " + art);
+		return;
+	}
+	Trace("ActivateKeySwitch " + ARTICULATION_TYPES[art]);
+	var ks = new NoteOn;
+	ks.pitch = GetKeySwitchNote(art);
+	ks.send();
+	prev_art = articulation;
+	keyswitch_active = true;
+}
+
+function DeactivateKeySwitch(art)
+{
+	if(art < 0)
+	{
+		Trace("DectivateKeySwitch invalid parameter " + art);
+		return;
+	}
+	Trace("DeactivateKeySwitch " + ARTICULATION_TYPES[art]);
+	var ks = new NoteOff;
+	ks.pitch = GetKeySwitchNote(art);
+	ks.send();
+	keyswitch_active = false;
+	prev_art = -1;
+}
+
+function GetKeySwitchNote(art)
+{
+	if(art < 0)
+	{
+		Trace("GetKeySwitchNote invalid parameter " + art);
+		return;
+	}
+	var art_ks_type = GetParameter(ARTICULATION_TYPES[art]);
+	var keyswitch = KEYSWITCH_NOTES[art_ks_type];
+	return MIDI.noteNumber(keyswitch);
 }
