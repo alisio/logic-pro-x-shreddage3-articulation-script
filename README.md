@@ -1,5 +1,7 @@
 # logic-pro-x-shreddage-articulation-script
 
+Short explanation video: https://youtu.be/deN8cRzTUzk
+
 Some ideas picked up from:
 
 http://www.logicprohelp.com/forum/viewtopic.php?f=45&t=117980
