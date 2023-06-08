@@ -2,7 +2,7 @@
 
 Short explanation video: https://youtu.be/deN8cRzTUzk
 
-![Screenshot](./Screenshot 2016-03-16 15.30.07.png?raw=true)
+![](<Screenshot 2016-03-16 15.30.07.png>)
 
 Some ideas picked up from:
 
